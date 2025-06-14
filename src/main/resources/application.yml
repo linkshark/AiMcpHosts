@@ -1,0 +1,21 @@
+server:
+  port: 9999
+spring:
+
+  application:
+    name: HcsbAiHost
+
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: qwen3:4b
+    # MCP 服务
+    mcp:
+      server:
+        name: mcp-server
+      sse-message-endpoint: /mcp/test
+
+#=====================================  log  =============================
+logging:
+  config: classpath:logback-project.xml

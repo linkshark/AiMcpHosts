@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- logback-spring加载早于application.yml，如果直接通过${参数key}的形式是无法获取到对应的参数值-->
+    <!-- source指定的是application.yml配置文件中key，其它地方直接用${log.path}引用这个值 -->
+    <!-- 解决在相对路径下生成log.path_IS_UNDEFINED的问题，增加defaultValue -->
+    <springProperty scope="context" name="base.path" source="logging.file.path" defaultValue="/data/logs"/>
+
+    <!-- app.name根据你的应用名称修改 -->
+    <springProperty scope="context" name="app.name" source="spring.application.name" defaultValue="applog"/>
+    <!-- 日志端 app端还是web端 -->
+    <springProperty scope="context" name="app.type" source="spring.application.name" defaultValue="appType"/>
+    <!-- 日志路径+名称 -->
+    <property name="log.path" value="${base.path}/${app.name}"/>
+
+    <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度,%msg：日志消息，%n是换行符-->
+    <property name="log.pattern" value="[${app.type}] [%X{userId}] [%X{userName}] [%X{telephone}] %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - [%tid] - %msg%n"/>
+
+    <!-- 控制台日志输出配置 -->
+    <appender name="consoleDevLog" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 彩色日志 -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                [${app.type}] [%X{userId}] [%X{userName}] [%X{telephone}] %d{yyyy-MM-dd HH:mm:ss} [%thread] %magenta(%-5level) %green([%logger]) >>> %cyan(%msg) %n
+            </pattern>
+        </layout>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="consoleDevLog"/>
+    </root>
+
+</configuration>
