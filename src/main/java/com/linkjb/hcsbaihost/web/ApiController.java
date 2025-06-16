@@ -21,9 +21,9 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/api/ai")
 public class ApiController {
 
-    @Qualifier("gzhRecommendTools")
+    @Qualifier("gzhTools")
     @Autowired
-    private ToolCallbackProvider toolCallbackProvider;
+    private ToolCallbackProvider gzhTools;
     @Autowired
     private  ChatClient chatClient;
 
@@ -34,10 +34,9 @@ public class ApiController {
     @Operation(summary = "非流式返回", method = "POST")
     @ApiOperationSupport(order = 1)
     public String generate(@RequestParam(value = "message", defaultValue = "推荐一个公众号") String message) {
-        System.out.println("xixi");
         return this.chatClient.prompt()
                 .user(message)
-                .toolCallbacks(toolCallbackProvider)
+                .toolCallbacks(gzhTools)
                 .call()
                 .content();
     }
@@ -48,7 +47,7 @@ public class ApiController {
     public ResponseEntity<Flux<String>> stream(@RequestParam(value = "message", defaultValue = "推荐一个公众号") String message) {
         ChatClient.StreamResponseSpec stream = this.chatClient.prompt()
                 .user(message)
-                .toolCallbacks(toolCallbackProvider)
+                .toolCallbacks(gzhTools)
                 .stream();
 
         Flux<String> content = stream.content();
