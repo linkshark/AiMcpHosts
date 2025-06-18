@@ -1,26 +1,101 @@
 package com.linkjb.hcsbaihost.service.impl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.linkjb.hcsbaihost.dao.ToolMapper;
+import com.linkjb.hcsbaihost.entity.Tool;
+import com.linkjb.hcsbaihost.entity.ToolParam;
+
+import com.linkjb.hcsbaihost.service.ToolParamService;
 import com.linkjb.hcsbaihost.service.ToolService;
-import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
+import com.linkjb.hcsbaihost.vo.ToolParamVO;
+import com.linkjb.hcsbaihost.vo.ToolVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("toolService")
-public class ToolServiceImpl implements ToolService {
-    @Tool(description = "推荐技术书籍")
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * @author shark
+ * @description 针对表【tool(工具信息)】的数据库操作Service实现
+ * @createDate 2025-04-11 12:02:41
+ */
+@Service
+public class ToolServiceImpl extends ServiceImpl<ToolMapper, Tool>
+        implements ToolService {
+
+    @Autowired
+    private ToolParamService toolParamService;
+
     @Override
-    public String msg1() {
-        return "推荐【Head First Java】，这本书通过生动有趣的方式讲解Java的基础知识，非常适合编程新手。";
+    public List<ToolVO> getByServerId(Long id) {
+        List<ToolVO> toolVOS;
+        List<Tool> tools = list(Wrappers.lambdaQuery(Tool.class)
+                .eq(Tool::getServerId, id));
+        if (CollectionUtil.isEmpty(tools)) {
+            return Collections.emptyList();
+        }
+        List<Long> ids = tools.stream().map(Tool::getId).toList();
+        List<ToolParam> params = toolParamService.list(Wrappers.lambdaQuery(ToolParam.class)
+                .in(ToolParam::getToolId, ids));
+        toolVOS = BeanUtil.copyToList(tools, ToolVO.class);
+        if (CollectionUtil.isNotEmpty(params)) {
+            Map<Long, List<ToolParam>> toolParamMap = params.stream().collect(Collectors.groupingBy(ToolParam::getToolId));
+            for (ToolVO toolVO : toolVOS) {
+                toolVO.setToolParam(BeanUtil.copyToList(toolParamMap.get(toolVO.getId()), ToolParamVO.class));
+            }
+        }
+        return toolVOS;
     }
 
-    @Tool(description = "推荐值得看的电影")
     @Override
-    public String msg2() {
-        return "推荐《中国机长》，是一部根据真实事件改编的影片，讲述了2018年5月14日四川航空3U8633航班机组成功处置特情的真实故事。该片由刘伟强执导，于勇敢编剧，并由张涵予、欧豪、杜江、袁泉等领衔主演！";
+    public void removeByServerId(Long id) {
+        List<Tool> tools = list(Wrappers.lambdaQuery(Tool.class)
+                .eq(Tool::getServerId, id));
+        if (CollectionUtil.isNotEmpty(tools)) {
+            List<Long> ids = tools.stream().map(Tool::getId).toList();
+            update(Wrappers.lambdaUpdate(Tool.class)
+                    .in(Tool::getId, ids)
+                    .set(Tool::getIsDeleted, 1)
+                    .set(Tool::getUpdateTime, DateUtil.now()));
+            toolParamService.update(Wrappers.lambdaUpdate(ToolParam.class)
+                    .in(ToolParam::getToolId, ids)
+                    .set(ToolParam::getIsDeleted, 1)
+                    .set(ToolParam::getUpdateTime, DateUtil.now()));
+        }
     }
 
-    @Tool(description = "查询天气")
     @Override
-    public String msg3(@ToolParam(description = "需要查询天气的城市名称，例如：成都") String city) {
-        return city + "，天气晴朗！";
+    public void doSave(List<ToolVO> tools, Long id) {
+        for (ToolVO toolVO : tools) {
+            Tool tool = BeanUtil.toBean(toolVO, Tool.class);
+            tool.setCreateTime(DateUtil.now());
+            tool.setUpdateTime(DateUtil.now());
+            tool.setServerId(id);
+            save(tool);
+            if (CollectionUtil.isNotEmpty(toolVO.getToolParam())) {
+                List<ToolParam> toolParams = new ArrayList<>(toolVO.getToolParam().size());
+                for (ToolParamVO toolParamVO : toolVO.getToolParam()) {
+                    ToolParam toolParam = BeanUtil.toBean(toolParamVO, ToolParam.class);
+                    toolParam.setToolId(tool.getId());
+                    toolParam.setRequired(toolParamVO.getRequired());
+                    toolParam.setCreateTime(DateUtil.now());
+                    toolParam.setUpdateTime(DateUtil.now());
+                    toolParams.add(toolParam);
+                }
+                toolParamService.saveBatch(toolParams);
+            }
+        }
     }
 }
+
+
+
+

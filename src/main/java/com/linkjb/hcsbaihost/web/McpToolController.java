@@ -6,6 +6,7 @@ import io.modelcontextprotocol.server.McpSyncServer;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.ai.mcp.McpToolUtils;
 import org.springframework.ai.support.ToolCallbacks;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,14 @@ public class McpToolController {
         for (McpServerFeatures.SyncToolSpecification newTool : newTools) {
             this.mcpSyncServer.addTool(newTool);
         }
+        return ResponseEntity.ok("添加成功");
+    }
+
+    @GetMapping("/addNettyServer")
+    public ResponseEntity<?> addNettyServer() {
+        //McpServerFeatures.SyncToolSpecification
+        List<McpServerFeatures.SyncToolSpecification> newTools = McpToolUtils.toSyncToolSpecifications(ToolCallbacks.from(this.mathService));
+        //MethodToolCallbackProvider.builder().build()
         return ResponseEntity.ok("添加成功");
     }
 

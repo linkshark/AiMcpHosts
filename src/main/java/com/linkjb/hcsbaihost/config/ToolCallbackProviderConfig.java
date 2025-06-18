@@ -1,7 +1,7 @@
 package com.linkjb.hcsbaihost.config;
 
 import com.linkjb.hcsbaihost.service.StudentService;
-import com.linkjb.hcsbaihost.service.ToolService;
+import com.linkjb.hcsbaihost.service.TestToolService;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 public class ToolCallbackProviderConfig {
 
     @Bean("gzhTools")
-    public ToolCallbackProvider gzhRecommendTools(ToolService toolService) {
-        return MethodToolCallbackProvider.builder().toolObjects(toolService).build();
+    public ToolCallbackProvider gzhRecommendTools(TestToolService testToolService) {
+        return MethodToolCallbackProvider.builder().toolObjects(testToolService).build();
     }
 
     @Bean("studentTools")
