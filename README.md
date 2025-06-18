@@ -1,0 +1,1 @@
+动态添加并维护多个mcp-server 并通过netty或httpclient去调用远程的mcp-server
