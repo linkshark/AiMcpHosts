@@ -26,3 +26,6 @@ spring:
 #=====================================  log  =============================
 logging:
   config: classpath:logback-project.xml
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
