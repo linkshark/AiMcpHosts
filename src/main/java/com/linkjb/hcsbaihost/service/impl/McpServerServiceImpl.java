@@ -183,6 +183,17 @@ public class McpServerServiceImpl extends ServiceImpl<McpServerMapper, McpServer
                 .toList();
     }
 
+    public static List<McpServerFeatures.SyncToolSpecification> toSyncToolSpecification(List<RemoteMcpToolCallback> tools) {
+        return tools.stream()
+                .collect(Collectors.toMap(tool -> tool.getToolDefinition().name(),
+                        tool -> tool,
+                        (existing, replacement) -> existing))
+                .values()
+                .stream()
+                .map(tool -> McpToolUtils.toSyncToolSpecification(tool, null))
+                .toList();
+    }
+
     private void clear(String randomStr) {
         serverMap.remove(randomStr);
         toolSpecificationMap.remove(randomStr);

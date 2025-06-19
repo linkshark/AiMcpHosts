@@ -10,6 +10,7 @@ import com.github.victools.jsonschema.module.jackson.JacksonOption;
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
 import com.linkjb.hcsbaihost.vo.ToolParamVO;
 import com.linkjb.hcsbaihost.vo.ToolVO;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.DefaultToolDefinition;
 import org.springframework.ai.tool.metadata.DefaultToolMetadata;
 import org.springframework.ai.util.json.JsonParser;
@@ -58,6 +59,14 @@ public class RemoteMcpUtil {
 
     public static List<RemoteMcpToolCallback> convertToolCallback(List<ToolVO> toolVOS) {
         return toolVOS.stream().map(toolVO -> RemoteMcpToolCallback.builder()
+                .toolVO(toolVO)
+                .toolDefinition(new DefaultToolDefinition(toolVO.getName(), toolVO.getDescription(), generateForMethodInput(toolVO.getToolParam())))
+                .toolMetadata(new DefaultToolMetadata(false))
+                .build()).toList();
+    }
+
+    public static List<ToolCallback> convertNormalToolCallback(List<ToolVO> toolVOS) {
+        return toolVOS.stream().map(toolVO -> (ToolCallback)RemoteMcpToolCallback.builder()
                 .toolVO(toolVO)
                 .toolDefinition(new DefaultToolDefinition(toolVO.getName(), toolVO.getDescription(), generateForMethodInput(toolVO.getToolParam())))
                 .toolMetadata(new DefaultToolMetadata(false))

@@ -35,13 +35,6 @@ public class McpToolController {
         return ResponseEntity.ok("添加成功");
     }
 
-    @GetMapping("/addNettyServer")
-    public ResponseEntity<?> addNettyServer() {
-        //McpServerFeatures.SyncToolSpecification
-        List<McpServerFeatures.SyncToolSpecification> newTools = McpToolUtils.toSyncToolSpecifications(ToolCallbacks.from(this.mathService));
-        //MethodToolCallbackProvider.builder().build()
-        return ResponseEntity.ok("添加成功");
-    }
 
     @GetMapping("/remove")
     public ResponseEntity<?> removeTool(String toolName) {

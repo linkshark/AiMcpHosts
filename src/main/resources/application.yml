@@ -1,3 +1,4 @@
+apiKey: *****
 server:
   port: 9999
 spring:
@@ -16,16 +17,34 @@ spring:
     ollama:
       base-url: http://localhost:11434
       chat:
-        model: qwen3:8b
+        model: qwen3:4b
     # MCP 服务
     mcp:
       server:
         name: mcp-server
-      sse-message-endpoint: /mcp/test
+        version: 1.0.0
+        tool-change-notification: true
+        sse-message-endpoint: /mcp/test
+        sse-endpoint: /sse
+        type: sync
+        stdio: false
+#      client:
+#        sse:
+#          connections:
+#            server1:
+#              url: http://localhost:9997
+#        toolcallback:
+#          enabled: true
 
 #=====================================  log  =============================
-logging:
-  config: classpath:logback-project.xml
+#logging:
+#  config: classpath:logback-project.xml
+  level:
+    org:
+      apache:
+        springframework:
+          ai: DEBUG
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    level: INFO

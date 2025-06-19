@@ -17,12 +17,17 @@ import com.linkjb.hcsbaihost.vo.ToolParamVO;
 import com.linkjb.hcsbaihost.vo.ToolVO;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.WebFluxSseServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.mcp.McpToolUtils;
+import org.springframework.ai.support.ToolCallbacks;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,6 +38,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.linkjb.hcsbaihost.service.impl.McpServerServiceImpl.*;
+import static org.springframework.ai.mcp.McpToolUtils.toSyncToolSpecifications;
 
 @SpringBootApplication
 @MapperScan(basePackages = "com.linkjb.hcsbaihost.dao")
@@ -46,7 +52,8 @@ public class HcsbAiHostApplication {
     public ChatMemory chatMemory() {
         return MessageWindowChatMemory.builder().build();
     }
-
+    @Resource
+    private McpSyncServer mcpSyncServer;
     /**
      * 启动时初始化数据库中已存在的mcp server
      * @param mcpServerService
@@ -86,6 +93,11 @@ public class HcsbAiHostApplication {
                     McpSchema.ServerCapabilities build = McpSchema.ServerCapabilities.builder().tools(true).build();
                     serverBuilder.capabilities(build);
                     McpAsyncServer asyncServer = serverBuilder.build();
+
+                    List<McpServerFeatures.SyncToolSpecification> syncToolSpecification = toSyncToolSpecification(remoteMcpToolCallbacks);
+                    for (McpServerFeatures.SyncToolSpecification newTool : syncToolSpecification) {
+                        this.mcpSyncServer.addTool(newTool);
+                    }
                     serverMap.put(server.getRandomStr(), asyncServer);
                     toolSpecificationMap.put(server.getRandomStr(), asyncToolSpecification);
                     remoteMcpHandlerMapping.addMapping(server.getRandomStr(), transportProvider.getRouterFunction());

@@ -4,7 +4,7 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
-@Service("toolService")
+@Service
 public class TestToolServiceImpl implements TestToolService {
     @Tool(description = "推荐技术书籍")
     @Override
