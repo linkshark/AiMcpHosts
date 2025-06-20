@@ -1,4 +1,4 @@
-apiKey: *****
+apiKey: ""
 server:
   port: 9999
 spring:
@@ -37,8 +37,8 @@ spring:
 #          enabled: true
 
 #=====================================  log  =============================
-#logging:
-#  config: classpath:logback-project.xml
+logging:
+  config: classpath:logback-project.xml
   level:
     org:
       apache:
